@@ -9,6 +9,13 @@ exports.addComponent = async (req, res) => {
             initialHeight, initialWidth, info
         });
 
+        const updatedComponent = await counterModel.findOneAndUpdate(
+            {}, 
+            {$inc: { componentCount: 1 } },
+            { new: true, upsert: true } 
+        );
+        
+
 
         return res.json({
             success: true,
@@ -52,6 +59,15 @@ exports.updateComponent = async (req, res) => {
             new: true,
         });
 
+       const p =  await counterModel.findOneAndUpdate(
+            {}, 
+            { $inc: { updateCount: 1 }, },
+            { new: true, upsert: true } 
+        );
+
+        console.log(p);
+        
+
         if (!updatedComponent) {
             return res.json({
                 error: 'Component not found',
@@ -65,6 +81,49 @@ exports.updateComponent = async (req, res) => {
     } catch (err) {
         return res.json({
             success: 'false',
+            error: err.message,
+        });
+    }
+}
+
+
+
+exports.getCounter = async (req, res) => {
+    try {
+        const info = await counterModel.find()
+        return res.json({
+            success: true,
+            info,
+        });
+    } catch (err) {
+        return res.json({
+            success: false,
+            error: err.message,
+        });
+    }
+}
+
+
+exports.updateCounter = async (req, res) => {
+    try {
+        const body = req.body;
+        console.log(body);
+        const { updateCount, componentCount } = body;
+
+        // Assuming your model has a field named 'count', update it with the provided value
+        const updatedComponent = await counterModel.findOneAndUpdate(
+            {}, 
+            { $set: {  updateCount, componentCount } },
+            { new: true, upsert: true } 
+        );
+
+        return res.json({
+            success: true,
+            updatedComponent,
+        });
+    } catch (err) {
+        return res.json({
+            success: false,
             error: err.message,
         });
     }
